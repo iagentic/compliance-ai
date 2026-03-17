@@ -50,6 +50,11 @@ export class RampRoleMappingController {
       throw new HttpException('connectionId is required', HttpStatus.BAD_REQUEST);
     }
 
+    const connection = await this.connectionRepository.findById(connectionId);
+    if (!connection || connection.organizationId !== organizationId) {
+      throw new HttpException('Connection not found', HttpStatus.NOT_FOUND);
+    }
+
     const shouldRefresh = refresh === 'true';
     let discoveredRoles: Array<{ role: string; userCount: number }>;
 
@@ -176,10 +181,16 @@ export class RampRoleMappingController {
   @Get('role-mapping')
   @RequirePermission('integration', 'read')
   async getRoleMapping(
+    @OrganizationId() organizationId: string,
     @Query('connectionId') connectionId: string,
   ) {
     if (!connectionId) {
       throw new HttpException('connectionId is required', HttpStatus.BAD_REQUEST);
+    }
+
+    const connection = await this.connectionRepository.findById(connectionId);
+    if (!connection || connection.organizationId !== organizationId) {
+      throw new HttpException('Connection not found', HttpStatus.NOT_FOUND);
     }
 
     const mapping = await this.roleMappingService.getSavedMapping(connectionId);
