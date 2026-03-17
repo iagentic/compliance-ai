@@ -120,6 +120,17 @@ export type {
 // Individual manifests (for direct import if needed)
 export { manifest as githubManifest } from './manifests/github';
 
+// Ramp types (used by sync controller)
+export type {
+  RampUser,
+  RampUserStatus,
+  RampUserRole,
+  RampKnownRole,
+  RampEmployee,
+  RampUsersResponse,
+  RoleMappingEntry,
+} from './manifests/ramp/types';
+
 // API Response types (for frontend and API type sharing)
 export type {
   CheckRunFindingResponse,
