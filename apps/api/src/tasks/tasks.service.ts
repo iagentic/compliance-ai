@@ -302,13 +302,21 @@ export class TasksService {
     changedByUserId: string,
   ): Promise<{ updatedCount: number }> {
     try {
+      // Enforce approval workflow: exclude tasks that can't be bulk-updated
+      const where: Record<string, unknown> = {
+        id: { in: taskIds },
+        organizationId,
+        // Cannot change status of tasks currently in review
+        status: { not: 'in_review' as TaskStatus },
+      };
+
+      // Cannot mark tasks as done if they have an approver assigned
+      if (status === TaskStatus.done) {
+        where.approverId = null;
+      }
+
       const result = await db.task.updateMany({
-        where: {
-          id: {
-            in: taskIds,
-          },
-          organizationId,
-        },
+        where,
         data: {
           status,
           updatedAt: new Date(),
@@ -474,6 +482,7 @@ export class TasksService {
           title: true,
           status: true,
           assigneeId: true,
+          approverId: true,
         },
       });
 
@@ -500,6 +509,23 @@ export class TasksService {
         dataToUpdate.description = updateData.description;
       }
       if (updateData.status !== undefined) {
+        // Prevent bypassing the approval workflow via direct status change
+        if (existingTask.status === 'in_review' && updateData.status !== 'in_review') {
+          throw new BadRequestException(
+            'Cannot change status directly while task is in review. Use the approve or reject actions instead.',
+          );
+        }
+        // Prevent directly setting status to 'done' when an approver is assigned
+        // (must go through submitForReview → approveTask workflow)
+        if (
+          updateData.status === 'done' &&
+          existingTask.status !== 'done' &&
+          existingTask.approverId
+        ) {
+          throw new BadRequestException(
+            'Cannot mark task as done directly when an approver is assigned. Submit for review instead.',
+          );
+        }
         dataToUpdate.status = updateData.status;
       }
       if (updateData.assigneeId !== undefined) {

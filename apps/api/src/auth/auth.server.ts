@@ -36,7 +36,7 @@ function getCookieDomain(): string | undefined {
 /**
  * Get trusted origins for CORS/auth
  */
-function getTrustedOrigins(): string[] {
+export function getTrustedOrigins(): string[] {
   const origins = process.env.AUTH_TRUSTED_ORIGINS;
   if (origins) {
     return origins.split(',').map((o) => o.trim());
@@ -150,6 +150,14 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
+    // Prevent cookie collisions between environments.
+    // Production keeps the default 'better-auth' prefix (unchanged).
+    ...(cookieDomain === '.staging.trycomp.ai' && {
+      cookiePrefix: 'staging',
+    }),
+    ...(!cookieDomain && {
+      cookiePrefix: 'local',
+    }),
     ...(cookieDomain && {
       crossSubDomainCookies: {
         enabled: true,
