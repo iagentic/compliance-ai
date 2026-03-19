@@ -43,7 +43,7 @@ export function PolicyPageActions({ policies }: PolicyPageActionsProps) {
       );
       const policyLogs = Object.fromEntries(logsEntries);
       const { downloadAllPolicies } = await import('@/lib/pdf-generator');
-      downloadAllPolicies(policies, policyLogs);
+      await downloadAllPolicies(policies, policyLogs);
     } finally {
       setIsDownloadingAll(false);
     }

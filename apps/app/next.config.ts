@@ -61,6 +61,8 @@ const config: NextConfig = {
     ],
   },
 
+  serverExternalPackages: ['jspdf'],
+
   experimental: {
     serverActions: {
       // NOTE: Attachment uploads may be sent as base64 strings, which increases payload size.

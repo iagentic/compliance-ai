@@ -177,7 +177,7 @@ export function PolicyHeaderActions({
         log.description?.toLowerCase().includes('approved'),
       );
       const { generatePolicyPDF } = await import('@/lib/pdf-generator');
-      generatePolicyPDF(policyContent, approvalLogs, policy.name || 'Policy Document');
+      await generatePolicyPDF(policyContent, approvalLogs, policy.name || 'Policy Document');
     } catch (error) {
       console.error('Error downloading policy PDF:', error);
       toast.error('Failed to generate policy PDF');
