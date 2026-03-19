@@ -1,4 +1,9 @@
-import { jsPDF } from 'jspdf';
+import type { jsPDF as JsPDFType } from 'jspdf';
+
+async function createPDF(): Promise<JsPDFType> {
+  const { jsPDF } = await import('jspdf');
+  return new jsPDF();
+}
 import type { JSONContent as TipTapJSONContent } from '@tiptap/react';
 import { AuditLog, User, Member, Organization, Policy } from '@db';
 import { format } from 'date-fns';
@@ -453,10 +458,10 @@ const addPageNumbers = (config: PDFConfig) => {
 /**
  * Converts JSON content to a formatted PDF document
  */
-export function generatePolicyPDF(jsonContent: TipTapJSONContent[], logs: AuditLogWithRelations[], policyTitle?: string): void {
+export async function generatePolicyPDF(jsonContent: TipTapJSONContent[], logs: AuditLogWithRelations[], policyTitle?: string): Promise<void> {
   const internalContent = convertToInternalFormat(jsonContent);
-  
-  const doc = new jsPDF();
+
+  const doc = await createPDF();
   const config: PDFConfig = {
     doc,
     pageWidth: doc.internal.pageSize.getWidth(),
@@ -619,12 +624,12 @@ function convertJSONToHTML(content: JSONContent[]): string {
 /**
  * Downloads all policies into one PDF document
  */
-export function downloadAllPolicies(
-  policies: Policy[], 
+export async function downloadAllPolicies(
+  policies: Policy[],
   policyLogs: { [policyId: string]: AuditLogWithRelations[] },
   organizationName?: string
-): void {
-  const doc = new jsPDF();
+): Promise<void> {
+  const doc = await createPDF();
   const config: PDFConfig = {
     doc,
     pageWidth: doc.internal.pageSize.getWidth(),
