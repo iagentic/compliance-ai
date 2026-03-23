@@ -1,6 +1,9 @@
 import { TASK_TEMPLATES } from '../../../task-mappings';
 import type { CheckContext, IntegrationCheck } from '../../../types';
-import { matchesSyncFilterTerms, parseSyncFilterTerms } from '../../../sync-filter/email-exclusion-terms';
+import {
+  filterGoogleWorkspaceUsersForChecks,
+  parseGoogleWorkspaceCheckUserFilter,
+} from '../check-user-filter';
 import type {
   GoogleWorkspaceRoleAssignmentsResponse,
   GoogleWorkspaceRolesResponse,
@@ -24,13 +27,7 @@ export const employeeAccessCheck: IntegrationCheck = {
   run: async (ctx: CheckContext) => {
     ctx.log('Starting Google Workspace Employee Access check');
 
-    const targetOrgUnits = ctx.variables.target_org_units as string[] | undefined;
-    const excludedTerms = parseSyncFilterTerms(
-      ctx.variables.sync_excluded_emails ?? ctx.variables.excluded_emails,
-    );
-    const includedTerms = parseSyncFilterTerms(ctx.variables.sync_included_emails);
-    const userFilterMode = ctx.variables.sync_user_filter_mode as 'all' | 'exclude' | 'include' | undefined;
-    const includeSuspended = ctx.variables.include_suspended === 'true';
+    const userFilterConfig = parseGoogleWorkspaceCheckUserFilter(ctx.variables);
 
     // Fetch all roles first to build a role ID -> name map
     ctx.log('Fetching available roles...');
@@ -130,40 +127,8 @@ export const employeeAccessCheck: IntegrationCheck = {
 
     ctx.log(`Fetched ${allUsers.length} total users`);
 
-    // Filter users (same rules as 2FA check and employee sync)
-    const activeUsers = allUsers.filter((user) => {
-      if (user.suspended && !includeSuspended) {
-        return false;
-      }
-      if (user.archived) {
-        return false;
-      }
-
-      if (targetOrgUnits && targetOrgUnits.length > 0) {
-        const userOu = user.orgUnitPath ?? '/';
-        const inOrgUnit = targetOrgUnits.some(
-          (ou) => ou === '/' || userOu === ou || userOu.startsWith(`${ou}/`),
-        );
-        if (!inOrgUnit) {
-          return false;
-        }
-      }
-
-      const email = user.primaryEmail.toLowerCase();
-
-      if (userFilterMode === 'exclude' && excludedTerms.length > 0) {
-        return !matchesSyncFilterTerms(email, excludedTerms);
-      }
-
-      if (userFilterMode === 'include') {
-        if (includedTerms.length === 0) {
-          return true;
-        }
-        return matchesSyncFilterTerms(email, includedTerms);
-      }
-
-      return true;
-    });
+    // Same rules as 2FA check and employee sync (sync.controller.ts)
+    const activeUsers = filterGoogleWorkspaceUsersForChecks(allUsers, userFilterConfig);
 
     ctx.log(`Found ${activeUsers.length} active users after filtering`);
 
