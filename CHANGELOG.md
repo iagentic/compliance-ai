@@ -1,3 +1,20 @@
+# [3.11.0](https://github.com/trycompai/comp/compare/v3.10.4...v3.11.0) (2026-03-24)
+
+
+### Bug Fixes
+
+* **integration-platform:** filter GWS employees by org units and filter mode on employee-access ([cfa39e3](https://github.com/trycompai/comp/commit/cfa39e3a25696cfb45a8a7cf1539dc2d36634368))
+* **integration-platform:** remove duplcated user filtering logic across two check files ([0408858](https://github.com/trycompai/comp/commit/0408858b8c00b7174cf15a6384c092961e5b3c4b))
+* **questionnaire:** correct maxDuration values for parsing tasks ([70c8d7e](https://github.com/trycompai/comp/commit/70c8d7e11976479c02047ad826d262bfc958880c))
+* **questionnaire:** update model name in logging for question parsing ([4884007](https://github.com/trycompai/comp/commit/4884007ce3cbf71453edc159bdf8c59b27c9fe0f))
+* **questionnaire:** update upload status message for async parsing tracking ([414475d](https://github.com/trycompai/comp/commit/414475d87be1e4acf4650bd2cdad1ca53f3e92ce))
+
+
+### Features
+
+* **questionnaire:** add fileSize to questionnaire upload and parsing ([e8937d1](https://github.com/trycompai/comp/commit/e8937d1506a5d1232b78d60bb4970479e21bada4))
+* **questionnaire:** update upload and parse functionality to trigger async processing ([b460cab](https://github.com/trycompai/comp/commit/b460cabd563a52e116d5dbdbc634e5272d78e9e7))
+
 ## [3.10.4](https://github.com/trycompai/comp/compare/v3.10.3...v3.10.4) (2026-03-20)
 
 
