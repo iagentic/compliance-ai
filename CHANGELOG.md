@@ -1,3 +1,11 @@
+## [3.12.2](https://github.com/trycompai/comp/compare/v3.12.1...v3.12.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **auth:** use better-auth APIs instead of direct DB session operations ([17378d9](https://github.com/trycompai/comp/commit/17378d95e7e9c5b71e011dac4d681e2442196cf2))
+* skip audit log for chat history and expose task templates to ui ([9baf09c](https://github.com/trycompai/comp/commit/9baf09c1e648960f7c38495a751aab07436ae4d7))
+
 ## [3.12.1](https://github.com/trycompai/comp/compare/v3.12.0...v3.12.1) (2026-03-30)
 
 
