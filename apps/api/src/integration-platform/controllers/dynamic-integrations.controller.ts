@@ -23,6 +23,7 @@ import { DynamicManifestLoaderService } from '../services/dynamic-manifest-loade
 import {
   validateIntegrationDefinition,
   CheckDefinitionSchema,
+  SyncDefinitionSchema,
 } from '@trycompai/integration-platform';
 
 @Controller({ path: 'internal/dynamic-integrations', version: '1' })
@@ -54,8 +55,13 @@ export class DynamicIntegrationsController {
 
     const def = validation.data!;
 
-    // Upsert the integration
+    // Validate and store syncDefinition through Zod to apply defaults (e.g., employeesPath)
     const rawSyncDef = (body as Record<string, unknown>).syncDefinition;
+    const validatedSyncDef = rawSyncDef
+      ? SyncDefinitionSchema.parse(rawSyncDef)
+      : undefined;
+
+    // Upsert the integration
     const integration = await this.dynamicIntegrationRepo.upsertBySlug({
       slug: def.slug,
       name: def.name,
@@ -68,8 +74,8 @@ export class DynamicIntegrationsController {
       authConfig: def.authConfig as unknown as Prisma.InputJsonValue,
       capabilities: def.capabilities as unknown as Prisma.InputJsonValue,
       supportsMultipleConnections: def.supportsMultipleConnections,
-      syncDefinition: rawSyncDef
-        ? (rawSyncDef as Prisma.InputJsonValue)
+      syncDefinition: validatedSyncDef
+        ? (JSON.parse(JSON.stringify(validatedSyncDef)) as Prisma.InputJsonValue)
         : undefined,
     });
 
@@ -142,7 +148,10 @@ export class DynamicIntegrationsController {
       );
     }
 
-    const rawSyncDef = (body as Record<string, unknown>).syncDefinition;
+    const rawSyncDefCreate = (body as Record<string, unknown>).syncDefinition;
+    const validatedSyncDefCreate = rawSyncDefCreate
+      ? SyncDefinitionSchema.parse(rawSyncDefCreate)
+      : undefined;
     const integration = await this.dynamicIntegrationRepo.create({
       slug: def.slug,
       name: def.name,
@@ -155,8 +164,8 @@ export class DynamicIntegrationsController {
       authConfig: def.authConfig as unknown as Prisma.InputJsonValue,
       capabilities: def.capabilities as unknown as Prisma.InputJsonValue,
       supportsMultipleConnections: def.supportsMultipleConnections,
-      syncDefinition: rawSyncDef
-        ? (rawSyncDef as Prisma.InputJsonValue)
+      syncDefinition: validatedSyncDefCreate
+        ? (JSON.parse(JSON.stringify(validatedSyncDefCreate)) as Prisma.InputJsonValue)
         : undefined,
     });
 

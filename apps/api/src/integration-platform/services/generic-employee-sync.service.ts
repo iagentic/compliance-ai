@@ -265,6 +265,8 @@ export class GenericEmployeeSyncService {
       }
     }
 
+    results.success = results.errors === 0;
+
     this.logger.log(
       `Sync complete for ${providerName}: ${results.imported} imported, ${results.reactivated} reactivated, ${results.deactivated} deactivated, ${results.skipped} skipped, ${results.errors} errors`,
     );
