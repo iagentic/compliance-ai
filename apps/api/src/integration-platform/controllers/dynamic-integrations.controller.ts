@@ -22,7 +22,6 @@ import { CheckRunRepository } from '../repositories/check-run.repository';
 import { DynamicManifestLoaderService } from '../services/dynamic-manifest-loader.service';
 import {
   validateIntegrationDefinition,
-  CheckDefinitionSchema,
   SyncDefinitionSchema,
 } from '@trycompai/integration-platform';
 
@@ -406,36 +405,21 @@ export class DynamicIntegrationsController {
       };
     }
 
-    // The top-level validateIntegrationDefinition already validates
-    // all checks and syncDefinition via Zod. If we got here, everything is valid.
-    // Do additional per-check validation for detailed error reporting.
-    const checkErrors: Array<{ checkSlug: string; errors: Array<{ path: string; message: string }> }> = [];
+    // validateIntegrationDefinition validates everything via Zod:
+    // the manifest fields, all check definitions, and syncDefinition.
+    // If we got here, the entire definition is valid.
     const definition = result.data!;
-    const rawBody = body as Record<string, unknown>;
-
-    for (const check of definition.checks) {
-      const checkResult = CheckDefinitionSchema.safeParse(check.definition);
-      if (!checkResult.success) {
-        checkErrors.push({
-          checkSlug: check.checkSlug,
-          errors: checkResult.error.issues.map((issue) => ({
-            path: issue.path.join('.'),
-            message: issue.message,
-          })),
-        });
-      }
-    }
 
     return {
-      valid: checkErrors.length === 0,
-      ...(checkErrors.length > 0 ? { checkErrors } : {}),
+      valid: true,
       summary: {
         slug: definition.slug,
         name: definition.name,
         category: definition.category,
         capabilities: definition.capabilities,
         checksCount: definition.checks.length,
-        hasSyncDefinition: !!rawBody.syncDefinition,
+        checkSlugs: definition.checks.map((c) => c.checkSlug),
+        hasSyncDefinition: !!(body as Record<string, unknown>).syncDefinition,
       },
     };
   }
