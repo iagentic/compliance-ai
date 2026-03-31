@@ -361,14 +361,16 @@ export function TeamMembersClient({
                     </>
                   ) : selectedProvider ? (
                     <div className="flex items-center gap-2">
-                      <Image
-                        src={getProviderLogo(selectedProvider)}
-                        alt={getProviderName(selectedProvider)}
-                        width={16}
-                        height={16}
-                        className="rounded-sm"
-                        unoptimized
-                      />
+                      {getProviderLogo(selectedProvider) && (
+                        <Image
+                          src={getProviderLogo(selectedProvider)}
+                          alt={getProviderName(selectedProvider)}
+                          width={16}
+                          height={16}
+                          className="rounded-sm"
+                          unoptimized
+                        />
+                      )}
                       <span className="truncate">{getProviderName(selectedProvider)}</span>
                     </div>
                   ) : (
